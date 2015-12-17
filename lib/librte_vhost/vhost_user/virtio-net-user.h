@@ -38,8 +38,10 @@
 #include "vhost-net-user.h"
 
 #define VHOST_USER_PROTOCOL_F_MQ	0
+#define VHOST_USER_PROTOCOL_F_LOG_SHMFD	1
 
-#define VHOST_USER_PROTOCOL_FEATURES	(1ULL << VHOST_USER_PROTOCOL_F_MQ)
+#define VHOST_USER_PROTOCOL_FEATURES	((1ULL << VHOST_USER_PROTOCOL_F_MQ) | \
+					 (1ULL << VHOST_USER_PROTOCOL_F_LOG_SHMFD))
 
 int user_set_mem_table(struct vhost_device_ctx, struct VhostUserMsg *);
 
