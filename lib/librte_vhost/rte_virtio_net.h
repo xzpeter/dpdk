@@ -59,6 +59,8 @@ struct rte_mbuf;
 /* Backend value set by guest. */
 #define VIRTIO_DEV_STOPPED -1
 
+#define VHOST_LOG_PAGE	4096
+
 
 /* Enum for virtqueue management. */
 enum {VIRTIO_RXQ, VIRTIO_TXQ, VIRTIO_QNUM};
@@ -204,6 +206,32 @@ gpa_to_vva(struct virtio_net *dev, uint64_t guest_pa)
 	}
 	return vhost_va;
 }
+
+static inline void __attribute__((always_inline))
+vhost_log_page(uint8_t *log_base, uint64_t page)
+{
+	log_base[page / 8] |= 1 << (page % 8);
+}
+
+static inline void __attribute__((always_inline))
+vhost_log_write(struct virtio_net *dev, uint64_t addr, uint64_t len)
+{
+	uint64_t page;
+
+	if (likely(((dev->features & (1ULL << VHOST_F_LOG_ALL)) == 0) ||
+		   !dev->log_base || !len))
+		return;
+
+	if (unlikely(dev->log_size < ((addr + len - 1) / VHOST_LOG_PAGE / 8)))
+		return;
+
+	page = addr / VHOST_LOG_PAGE;
+	while (page * VHOST_LOG_PAGE < addr + len) {
+		vhost_log_page((uint8_t *)(uintptr_t)dev->log_base, page);
+		page += 1;
+	}
+}
+
 
 /**
  *  Disable features in feature_mask. Returns 0 on success.
