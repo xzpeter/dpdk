@@ -45,6 +45,7 @@
 #include <sys/eventfd.h>
 #include <sys/socket.h>
 #include <linux/if.h>
+#include <linux/vhost.h>
 
 #include <rte_memory.h>
 #include <rte_mempool.h>
